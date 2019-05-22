@@ -18,8 +18,21 @@
 (define-condition triangle-error  (error) ())
 
 (defun triangle (a b c)
-  :write-me)
-
+  (let ((loop-val
+           (loop for x in (list a b c)
+              do (when (<= x 0) (error 'triangle-error))
+              sum x into summed
+              maximize x into maximized
+              finally (return (list summed maximized)))))
+    (destructuring-bind (summed maximized) loop-val
+      (let ((count 0))
+        (when (>= maximized (- summed maximized)) (error 'triangle-error))
+        (when (eq a c) (setf count (+ count 1)))
+        (when (eq b c) (setf count (+ count 1)))
+        (when (eq a b) (setf count (+ count 1)))
+        (when (eq count 3) (return-from triangle :equilateral))
+        (when (eq count 1) (return-from triangle :isosceles))
+        :scalene))))
 
 (define-test test-equilateral-triangles-have-equal-sides
     (assert-equal :equilateral (triangle 2 2 2))
